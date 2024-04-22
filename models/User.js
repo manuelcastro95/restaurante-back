@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  role_id: {
+  role: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Role',
     required: false
@@ -68,10 +68,12 @@ userSchema.pre('save', function (next) {
 });
 
 // Método para comparar la contraseña ingresada con el hash almacenado
-userSchema.methods.comparePassword = function (candidatePassword, cb) {
-  bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
-    if (err) return cb(err);
-    cb(null, isMatch);
+userSchema.methods.comparePassword = function(candidatePassword) {
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
+      if (err) return reject(err);
+      resolve(isMatch);
+    });
   });
 };
 

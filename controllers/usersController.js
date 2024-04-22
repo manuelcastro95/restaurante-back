@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 
 const listarUsuarios = async (req, res) => {
   try {
-    const users = await User.find({}).populate('role_id');
+    const users = await User.find({}).populate('role');
     res.json(users);
   } catch (error) {
     console.error('Error', error);
@@ -20,7 +20,7 @@ const storeUser = async (req, res) => {
   try {
     const role = await Role.findById(roleId);
 
-    const user = new User({ nombre, apellido, email, telefono, password, role_id: role._id });
+    const user = new User({ nombre, apellido, email, telefono, password, role: role._id });
     await user.save();
   } catch (error) {
     console.error('Error al crear usuario:', error);

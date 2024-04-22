@@ -10,32 +10,29 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-
-    const user = await User.findOne({ email: email }).exec();
+    const user = await User.findOne({ email }).populate('role').exec();
 
     if (!user) {
       return res.status(404).json({ mensaje: "Usuario no encontrado." });
     }
 
     // Comparar la contraseña con el hash almacenado
-    user.comparePassword(password, (err, isMatch) => {
-      if (err) {
-        return res.status(500).json({ error: 'Error al comparar contraseñas' });
-      }
-      if (!isMatch) {
-        return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
-      }
+    const isMatch = await user.comparePassword(password);  // Modificado para usar async/await
+    if (!isMatch) {
+      return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
+    }
 
-      // Si las contraseñas coinciden, devolver los datos del usuario
-      const userToReturn = { ...user.toObject(), password: undefined };
-      res.json(userToReturn);
-    });
+    const userToReturn = {
+      ...user.toObject(),
+      password: undefined
+    };
+
+    res.json(userToReturn);
   } catch (error) {
     console.error('Error en la autenticación:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
-
 
 module.exports = {
   login
