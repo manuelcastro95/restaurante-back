@@ -1,5 +1,5 @@
 const Categoria = require('../models/Categoria');
-
+const { logCreate, logUpdate, logDelete, logOther } =  require('../traits/activityTraits');
 
 const getCategorias = async (req, res) => {
   try {
@@ -18,6 +18,7 @@ const storeCategoria = async (req, res) => {
   try {
     const categoria = new Categoria(nuevoCategoria);
     await categoria.save();
+    logCreate(req.idUserAuth, `Categoria creada: ${categoria.nombre}`);
   } catch (error) {
     console.error('Error al crear categoria:', error);
   }
@@ -38,7 +39,7 @@ const getCategoria = async (req, res) => {
 
 const updateCategoria = async (req, res) => {
   const { id } = req.params;
-  const { nombre, descripcion } = req.body;
+  const { nombre, descripcion,idUserAuth } = req.body;
 
   try {
     const categoria = await Categoria.findById(id);
@@ -49,6 +50,8 @@ const updateCategoria = async (req, res) => {
     if (nombre) categoria.nombre = nombre;
 
     await categoria.save();
+
+    logUpdate(idUserAuth, `Categoria actualizada: ${categoria.nombre}`);
     res.json({ mensaje: 'Categoria actualizado exitosamente' });
 
   } catch (error) {
@@ -60,7 +63,7 @@ const updateCategoria = async (req, res) => {
 
 const updateStatus = async (req, res) => {
   const { id } = req.params;
-  const { estado } = req.body;
+  const { estado,idUserAuth } = req.body;
 
   try {
     const categoria = await Categoria.findById(id);
@@ -71,6 +74,7 @@ const updateStatus = async (req, res) => {
     if (estado !== undefined) categoria.estado = estado;
     await categoria.save();
 
+    logUpdate(idUserAuth, `Estado Categoria actualizado ${categoria.nombre}`);
     res.status(200).json({ mensaje: 'Categoria actualizado exitosamente' });
 
   } catch (error) {

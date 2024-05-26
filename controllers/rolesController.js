@@ -1,5 +1,5 @@
 const Role = require('../models/Role');
-
+const { logCreate, logUpdate, logDelete, logOther } = require('../traits/activityTraits');
 
 const getRoles = async (req, res) => {
   try {
@@ -11,34 +11,39 @@ const getRoles = async (req, res) => {
   }
 }
 
-
 const storeRole = async (req, res) => {
-  const nuevoRole = req.body;
+  const {nombre, descripcion,idUserAuth} = req.body;
 
   try {
-    const role = new Role(nuevoRole);
+    const role = new Role({nombre, descripcion});
     await role.save();
+    logCreate(idUserAuth, `Rol creado: ${role.nombre}`);
+    res.status(200).json({ mensaje: 'Rol registrado exitosamente' });
   } catch (error) {
     console.error('Error al crear rol:', error);
+    res.status(500).send('Server error');
   }
-
-  res.status(200).json({ mensaje: 'Rol insertado exitosamente' });
 }
 
 const getRole = async (req, res) => {
   const { id } = req.params;
 
-  const role = await Role.findById(id);
-  if (role) {
-    res.json(role);
-  } else {
-    res.json({ mensaje: 'Rol no encontrado' });
+  try {
+    const role = await Role.findById(id);
+    if (role) {
+      res.json(role);
+    } else {
+      res.status(404).json({ mensaje: 'Rol no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error', error);
+    res.status(500).send('Server error');
   }
 }
 
 const updateRole = async (req, res) => {
   const { id } = req.params;
-  const { nombre, descripcion } = req.body;
+  const { nombre, descripcion,idUserAuth } = req.body;
 
   try {
     const role = await Role.findById(id);
@@ -50,18 +55,17 @@ const updateRole = async (req, res) => {
     if (descripcion) role.descripcion = descripcion;
 
     await role.save();
+    logUpdate(idUserAuth, `Rol actualizado: ${role.nombre}`);
     res.json({ mensaje: 'Rol actualizado exitosamente' });
-
   } catch (error) {
-    console.error('Error al crear rol:', error);
-    res.json({ mensaje: 'Error al actualizar el rol' + error });
+    console.error('Error al actualizar rol:', error);
+    res.status(500).json({ mensaje: 'Error al actualizar el rol' });
   }
 }
 
-
 const updateStatus = async (req, res) => {
   const { id } = req.params;
-  const { estado } = req.body;
+  const { estado,idUserAuth } = req.body;
 
   try {
     const role = await Role.findById(id);
@@ -71,14 +75,12 @@ const updateStatus = async (req, res) => {
 
     if (estado !== undefined) role.estado = estado;
     await role.save();
-
-    res.status(200).json({ mensaje: 'Rol actualizado exitosamente' });
-
+    logUpdate(idUserAuth, `Estado del rol actualizado: ${role.nombre}`);
+    res.status(200).json({ mensaje: 'Estado del rol actualizado exitosamente' });
   } catch (error) {
     console.error('Error al actualizar rol:', error);
-    res.json({ mensaje: 'Error al actualizar el rol' + error });
+    res.status(500).json({ mensaje: 'Error al actualizar el rol' });
   }
-
 }
 
 module.exports = {

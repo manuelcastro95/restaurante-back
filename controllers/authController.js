@@ -1,10 +1,6 @@
-const fs = require('fs/promises');
-const path = require('path');
-const rutaArchivo = path.join(__dirname, '../db/users.json');
-
 const User = require('../models/User');
 const mongoose = require('../db/dbmongo');
-
+const { logOther } = require('../traits/activityTraits');
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -27,6 +23,7 @@ const login = async (req, res) => {
       password: undefined
     };
 
+    logOther(user._id, 'incio sesion', 'el usuario ha iniciado sesion correctamente');
     res.json(userToReturn);
   } catch (error) {
     console.error('Error en la autenticación:', error);
