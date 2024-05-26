@@ -19,6 +19,21 @@ routerApi(restauranteRouter);
 // Aplicar el prefijo a todas las rutas en el nuevo enrutador
 app.use(prefix, restauranteRouter);
 
+
+app.get("/", (req, res) => {
+  const htmlResponse = `
+    <html>
+      <head>
+        <title>Endpoints Restaurante</title>
+      </head>
+      <body>
+        <h1></h1>
+      </body>
+    </html>
+  `;
+  res.send(htmlResponse);
+});
+
 app.listen(port, () => {
   console.log(`Listening at port ${port}`);
 });
